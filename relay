@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# ~/bin/relay
+# Menú de programas de control de relays
+
+## TEXTOS
+nl="\n"
+
+TXT_bienv="Bienvenido al programa de control remoto de pins de tu Rpi!"
+TXT_selec='Selecciona  una opción:'
+TXT_opci1='Gestión de pines [rpin]'
+TXT_opci2='Por determinar [adios]'
+TXT_opci3='Por determinar [yavuelvo]'
+TXT_opci4='Apagar Edimax'
+TXT_opci5='Encender Edimax'
+
+# 
+TXT_opcX='Opción desconocida.'
+TXT_opc1_2='Iniciando programa ...'
+TXT_opc1_3='Copia de seguridad realizada.'
+TXT_salir='Saliendo del programa'
+TXT_paths='Lista de rutas incluidas en $PATH'
+TXT_reini='Reiniciar el programa [si/no]'
+
+## VARIBLES
+# destino de copias
+RA_copias='/var/media/descargas/backup'
+RA_config='/var/media/descargas/backup/config'
+# Archivos a copiar
+RA_home='/home/pi'
+fecha=`date +"%F"`
+hora=`date +"%H.%M.%S"`
+
+clear
+
+printf "$nl$TXT_bienv$nl"
+printf "$TXT_selec$nl"
+
+printf "
+ [1] $TXT_opci1$nl
+ [2] $TXT_opci2$nl
+ [3] $TXT_opci3$nl
+ [4] $TXT_opci4$nl
+ [5] $TXT_opci5$nl
+\e[92m
+ [0] Salir
+\e[0m
+"
+
+read -n 1
+printf $nl
+
+[ "$REPLY" = 0 ] && printf "$TXT_salir$nl" && exit
+
+if [ "$REPLY" = 1 ]; then
+ printf "$TXT_opc1_2$nl"
+ sleep 1
+ rpin
+elif [ "$REPLY" = 2 ]; then
+ adios
+elif [ "$REPLY" = 3 ]; then
+ yavuelvo
+elif [ "$REPLY" = 4 ]; then
+ ediplugoff.sh
+elif [ "$REPLY" = 5 ]; then
+ ediplugon.sh
+else
+ printf "$TXT_opcX$nl"
+ printf "TXT_salir$nl"
+fi

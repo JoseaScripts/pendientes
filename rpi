@@ -1,0 +1,108 @@
+#!/bin/bash
+# Control GPIO de Raspberry
+
+## HECHO
+# >> Desactivar todos los pines
+# >> Cambiar valor durante un tiempo determinado
+# >> Opción [0] Salir
+
+## PENDIENTE
+
+# 0 -> encendido
+# 1 -> apagado
+
+function cerrar_todo {
+	while IFS= read -r control
+	do
+		printf "\n[·] %s \"%s\" -> %s" "${control##*/}" "$(cat $control/direction)" "$(cat $control/value)"
+		pin="${control##*/gpio}"
+		echo $pin > $RA_gpio/unexport
+		printf "\npin $pin desactivado"
+	done < <(find /sys/class/gpio/ -name "gpio[0-9]*")
+
+	printf "\nPines abiertos:\n"
+        while IFS= read -r control
+        do
+                printf "\n[·] %s \"%s\" -> %s" "${control##*/}" "$(cat $control/direction)" "$(cat $control/value)"
+        done < <(find /sys/class/gpio/ -name "gpio[0-9]*")
+	printf "\n"
+}
+
+function controles (){
+ printf "Funciones activadas: %s, %s, %s" $1 $2 $3
+ accion=$1
+ pin=$2
+ opcion=$3
+
+if [ $accion = 1 ]; then
+        echo $pin > "$RA_gpio/export"
+        sleep 1
+        echo "$opcion" > $RA_gpio/gpio$pin/direction
+elif [ $accion = 2 ]; then
+        direccion="$(cat $RA_gpio/gpio$pin/direction)"
+        [ "$direccion" = 'in' ] && echo 'out' > $RA_gpio/gpio$pin/direction || echo 'in' > $RA_gpio/gpio$pin/di$
+elif [ $accion = 3 ]; then
+        valor="$(cat $RA_gpio/gpio$pin/value)"
+        [ "$valor" = '0' ] && echo 1 > $RA_gpio/gpio$pin/value || echo 0 > $RA_gpio/gpio$pin/value
+elif [ $accion = 4 ]; then
+        valor="$(cat $RA_gpio/gpio$pin/value)"
+        [ "$valor" = '0' ] && echo 1 > $RA_gpio/gpio$pin/value || echo 0 > $RA_gpio/gpio$pin/value
+        sleep $opcion
+        echo $valor > $RA_gpio/gpio$pin/value
+elif [ $accion = 9 ]; then
+        cerrar_todo
+fi
+exit 1
+}
+
+
+RA_gpio="/sys/class/gpio"
+
+cd $RA_gpio
+
+printf "\nPines activos:\n"
+#i=0
+while IFS= read -r control
+do
+#	(( i = $i + 1 ))
+	printf "\n[·] %s \"%s\" -> %s" "${control##*/}" "$(cat $control/direction)" "$(cat $control/value)"
+
+
+#	[ -r "$control/direction" ] &&  printf "$(cat $control/direction)"
+#	[ -r "$control/value" ] && printf "$(cat $control/value)"
+
+done < <(find /sys/class/gpio/ -name "gpio[0-9]*")
+
+
+printf "\n\nAcciones permitidas:\n
+[1] Activar pin (1 pin dirección)
+[2] Cambiar dirección del pin
+[3] Cambiar valor del pin
+[4] Cambiar valor por x segundos
+[9] Desactivar todos los pines
+[0] Salir
+"
+[ -z $1 ] || [ -z $2 ] || controles $1 $2 $3 
+
+printf "\nSelecciona la acción a realizar y luego el pin. ej. [2 17]\nacción\tpin\tsegundos\n"
+read accion pin opcion
+
+if [ $accion = 1 ]; then
+	echo $pin > "$RA_gpio/export"
+	echo $opcion > $RA_gpio/gpio$pin/direction
+elif [ $accion = 2 ]; then
+	direccion="$(cat $RA_gpio/gpio$pin/direction)"
+	[ "$direccion" = 'in' ] && echo 'out' > $RA_gpio/gpio$pin/direction || echo 'in' > $RA_gpio/gpio$pin/direction
+elif [ $accion = 3 ]; then
+	valor="$(cat $RA_gpio/gpio$pin/value)"
+	[ "$valor" = '0' ] && echo 1 > $RA_gpio/gpio$pin/value || echo 0 > $RA_gpio/gpio$pin/value
+elif [ $accion = 4 ]; then
+        valor="$(cat $RA_gpio/gpio$pin/value)"
+        [ "$valor" = '0' ] && echo 1 > $RA_gpio/gpio$pin/value || echo 0 > $RA_gpio/gpio$pin/value
+	sleep $opcion
+        echo $valor > $RA_gpio/gpio$pin/value
+elif [ $accion = 9 ]; then
+	cerrar_todo
+else
+	exit
+fi

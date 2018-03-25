@@ -1,0 +1,40 @@
+#!/bin/sh
+# /home/pi/bin/apagado
+
+#  Puedo modificarlo para que encienda o apague un relay al detectar mi presencia (lenovo)
+#  También puede avisarme si la raspberry sigue encendida o incluso apagarla
+#  Para que pueda apagar la raspberry tengo que ejecutar el script como root (sudo)
+
+## PENDIENTE ##
+#  Posibilidad de apagar el sistema sin necesitar ser root al activar el script
+#  Opciones de inicio en crontab como sudoer
+
+# Dirección ip del servidor
+ip='192.168.1.1'
+
+# Tiempo de espera
+ciclo=30
+# Minutos para el apagado de la raspberry
+espera=10
+
+# Hora de ping - tengo que buscar la manera de que se actualice por cada ping
+hora=`date +"%H.%M.%S"`
+
+
+while ping -c1 $ip
+do
+# Acciones cuando el ping encuentra la ip
+    printf "\n/home/pin/bin/salir\nMonitorizando estado de la red para posible apagado. %s\n" `date +"%H.%M.%S"`
+    sleep $ciclo
+done
+
+# Acciones cuando el ping se pierde.
+# No puedo enviar un mail de aviso, porque aquí ya me he quedado sin conexión
+# Tampoco me sirve el aviso de texto si mi conexión ssh no funciona
+     printf "\nRaspberry en proceso de apagado\n"
+
+#    Funciona solo si se llama al script como sudoer
+     shutdown -h $espera
+
+#    Reproducir el sonido hace que se bloquee cualquier acción siguiente. Perola orden de apagado continua activa
+     omxplayer /home/pi/audio/police_s.wav

@@ -1,0 +1,31 @@
+#!/bin/sh
+# /home/pi/bin/yaviene
+
+# Avisar cuando recibe señal de una ip
+# Puedo enviar el nombre de las ips en el script u otra ip como argumento
+
+## PENDIENTE ##
+#
+
+# Direcciones ip
+jose='192.168.1.123'
+fatima='192.168.1.125'
+
+ip=$1
+
+[ $ip = 'jose' ] && ip="$jose"
+[ $ip = 'fatima' ] && ip="$fatima"
+
+# Tiempo de espera
+ciclo=10
+# Minutos para el apagado de la raspberry
+espera=3
+
+# Termina el código antes de recibir la respuesta de los paquetes
+until ping -c1 $ip
+do
+ printf "No está\n"
+ sleep 1
+done
+ printf "ip localizada\n"
+ sleep 1

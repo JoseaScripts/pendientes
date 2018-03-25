@@ -1,0 +1,44 @@
+#!/bin/bash
+# /home/pi/bin/yavuelvo
+
+# Primero cambia el estado del pin, luego
+# Localiza una ip, cuando deja de estar en línea comienza su rastreo
+# Al volver a estar en línea salta la luz y otros avisos
+
+## PENDIENTE ##
+
+# Direcciones ip
+jose='192.168.1.123'
+fatima='192.168.1.125'
+
+ip=$1
+
+[ $ip = 'jose' ] && ip="$jose"
+[ $ip = 'fatima' ] && ip="$fatima"
+
+# Tiempo de espera para cada rastreo del ping
+ciclo=3
+# Tiempos de ciclo en espera cuando todavía no me he marchado
+espera=30
+# Tiempo de transición a partir de cuando se pierde la señal
+trans=300
+
+./rpin 3 2
+while ping -c1 $ip
+do
+ printf "%s todavía no se ha marchado. >> %s\n" $1 `date +"%H:%M:%S"`
+ sleep $ciclo
+done
+# Aquí ya me he marchado y espera mi vuelta
+# Apago la luz
+./rpin 3 2
+sleep $trans
+until ping -c1 $ip
+do
+ printf "No está\n"
+ sleep $ciclo
+done
+ printf "ip localizada\n"
+ sleep $ciclo
+# encender la luz
+./rpin 3 2

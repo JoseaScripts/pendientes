@@ -1,0 +1,28 @@
+#!/bin/sh
+# /home/pi/bin/buscarping
+
+# Detecta la presencia de Fátima al registrarse su móvil en la red de casa
+# Puedo modificarlo para que encienda o apague un relay al detectar mi presencia (lenovo)
+# También puede avisarme si la raspberry sigue encendida
+
+## PENDIENTE ##
+# Necesito salir del programa una vez se ha reproducido el sonido.
+
+# Meto el argumento en ip
+# Luego compruebo si el argumento está en la lista de ips conocidas y le asigno el valor
+ip=$1
+if   [ $1 = 'lenovo' ]; then ip='192.168.1.123'
+elif [ $1 = 'fatima' ]; then ip='192.168.1.125'
+fi
+
+while true;
+do
+  ping -c3 $ip
+  if [ $? -eq 0 ]
+  then
+    omxplayer /home/pi/audio/police_s.wav
+    printf "\n%s está aquí\n"
+    sleep 3
+    exit 0
+  fi
+done

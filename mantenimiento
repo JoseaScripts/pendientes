@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# Archivo: euroga
+# --------------------------------------------- #
+# Tareas de inicio				#
+# Copias de seguridad                         	#
+# Diccionario de guaraní                       	#
+# --------------------------------------------- #
+
+## PENDIENTE
+# Separar tareas por script para permitir realizar las tareas desde el cron o con el comando 'at'
+# Preguntar si es necesario modificar el PATH para ejecutar el programa de guarani (si ya se hizo antes)
+
+
+## TEXTOS
+nl="\n"
+TXT_bienv="Bienvenido al programa de administración y mantenimiento de tu Rpi!"
+TXT_selec='Selecciona  una opción:'
+TXT_opci1='Diccionario guaraní'
+TXT_opci2='Añadir nuevos directorios a $PATH'
+TXT_opci3='Copia de seguridad'
+TXT_opci4='Añadir codecs'
+# TXT_opc1_1='Añadiendo la ruta del diccionario a $PATH' # obsoleto
+TXT_opc1_2='Iniciando programa ...'
+TXT_opc1_3='Copia de seguridad realizada.'
+TXT_salir='Saliendo del programa'
+TXT_paths='Lista de rutas incluidas en $PATH'
+TXT_reini='Reiniciar el programa [si/no]'
+
+## VARIBLES
+# destino de copias
+RA_copias='/var/media/descargas/backup'
+RA_config='/var/media/descargas/backup/config'
+# Archivos a copiar
+RA_home='/home/pi'
+fecha=`date +"%F"`
+hora=`date +"%H.%M.%S"`
+
+
+
+clear
+
+printf "$nl$TXT_bienv$nl"
+printf "$TXT_selec$nl"
+
+printf "
+ [1] $TXT_opci1$nl
+ [2] $TXT_opci2$nl
+ [3] $TXT_opci3$nl
+ [4] $TXT_opci4$nl
+\e[92m
+ [0] Salir
+\e[0m
+"
+
+read -n 1
+printf $nl
+
+[ "$REPLY" = 0 ] && printf "$TXT_salir$nl" && exit
+
+if [ "$REPLY" = 1 ]; then
+ printf "$TXT_opc1_2$nl"
+ sleep 1
+ guarani
+elif [ "$REPLY" = 2 ]; then
+ export PATH=~/bin/guarani/:$PATH
+ export PATH=$PATH:~/bin/josea
+ export PATH=~/bin/geuroga:$PATH
+ printf "$TXT_paths$nl$nl"
+ sleep 0.8
+ echo $PATH | tr : \\n
+
+elif [ "$REPLY" = 3 ]; then
+ hostname=`hostname`
+ [ ! -e $RA_config/$hostname/ ] && mkdir $RA_config/$hostname
+ [ ! -e $RA_copias/$hostname/ ] && mkdir $RA_copias/$hostname
+ [ ! -e $RA_copias/$hostname/$fecha ] && mkdir $RA_copias/$hostname/$fecha
+ mkdir $RA_copias/$hostname/$fecha/$hora
+ cp -u /etc/fstab /etc/network/interfaces /etc/dhcpcd.conf /etc/wpa_supplicant/wpa_supplicant.conf $RA_config/$hostname
+ cp -uR $RA_home/* $RA_copias/$hostname/$fecha/$hora
+ echo $PATH | tr : \\n > $RA_copias/$hostname/$fecha/$hora/PATH
+ echo $TXT_opc1_3
+
+elif [ "$REPLY" = 4 ]; then
+#  decode=`cat /boot/config.txt | grep config`
+  decode=`cat /boot/config.txt | grep decode_MPG2=`
+  if [ ! -z $decode ]; then
+   echo "Ya existe en config.txt:\n$decode"
+  else
+   serial=`cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2`
+   [ -f "/home/pi/$serial" ] && echo '$serial existe\n' || echo "$serial no existe\n"
+   echo `cat /home/pi/$serial` >> /boot/config.txt
+  fi
+fi
+
+# Opción de reiniciar el programa para realizar otra tarea
+printf "$nl$TXT_reini$nl"
+read reini_sn
+#printf $nl
+[ "$reini_sn" = 'si' ] && euroga || printf "$TXT_salir$nl"
