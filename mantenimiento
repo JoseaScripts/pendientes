@@ -84,12 +84,12 @@ elif [ "$REPLY" = 3 ]; then
 elif [ "$REPLY" = 4 ]; then
 #  decode=`cat /boot/config.txt | grep config`
   decode=`cat /boot/config.txt | grep decode_MPG2=`
-  if [ ! -z $decode ]; then
-   echo "Ya existe en config.txt:\n$decode"
+  if [ ! -z "$decode" ]; then
+   printf "Ya existe en config.txt: %s\n" $decode
   else
    serial=`cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2`
-   [ -f "/home/pi/$serial" ] && echo '$serial existe\n' || echo "$serial no existe\n"
-   echo `cat /home/pi/$serial` >> /boot/config.txt
+   [ -f "/home/pi/$serial" ] && echo "$serial existe\n" || echo "$serial no existe\n"
+   cat /home/pi/$serial >> /boot/config.txt
   fi
 fi
 
